@@ -8,6 +8,12 @@ module ProxyRecord
     class << self
       private
 
+      def inherited(model_class)
+        if data_model_class
+          data_model_class.proxy_record_class = model_class
+        end
+      end
+
       def class_proxy_delegate(*m)
         m.each do |method_name|
           define_singleton_method(method_name) do
@@ -19,7 +25,7 @@ module ProxyRecord
       # TODO try to move to ProxyRecord
       def wrap(o)
         case o
-        when data_model_class then new(o)
+        when ActiveRecord::Base then o.class.proxy_record_class.send(:new, o)
           # TODO there is a bug here since the relation won't always be the same type
         when ActiveRecord::Relation then CollectionProxy.new(o) { |e| wrap(e) }
         when Integer, String then o

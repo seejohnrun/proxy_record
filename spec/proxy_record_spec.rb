@@ -2,65 +2,55 @@ require 'spec_helper'
 
 describe ProxyRecord do
   it 'should not have access to model class methods' do
-    model_parent_class = Class.new do
-      def self.foo
-      end
-    end
+    klass = Class.new(ProxyRecord[ActiveRecord::Base])
 
-    klass = Class.new(ProxyRecord[model_parent_class])
-
-    expect(klass).not_to respond_to(:foo)
+    expect(klass).not_to respond_to(:count)
   end
 
   it 'should be able to call class methods on the proxy class' do
-    model_parent_class = Class.new do
-      def self.foo
-        'result'
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      def self.count_proxy
+        data_model_class.count
       end
     end
 
-    klass = Class.new(ProxyRecord[model_parent_class]) do
-      def self.foo_proxy
-        data_model_class.foo
-      end
-    end
-
-    expect(klass.foo_proxy).to eq('result')
+    expect(klass.count_proxy).to eq(0)
   end
 
   it 'should not have access to model instance methods' do
-    model_parent_class = Class.new do
-      def foo
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
       end
-    end
 
-    klass = Class.new(ProxyRecord[model_parent_class]) do
       def self.build
         wrap(data_model_class.new)
       end
     end
 
-    expect(klass.build).not_to respond_to(:foo)
+    expect(klass.build).not_to respond_to(:login)
   end
 
   it 'should be able to call instance methods on the proxy class' do
-    model_parent_class = Class.new do
-      def foo
-        'result'
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
       end
-    end
 
-    klass = Class.new(ProxyRecord[model_parent_class]) do
-      def foo_proxy
-        data_model.foo
+      def login_proxy
+        data_model.login
       end
 
       def self.build
-        wrap(data_model_class.new)
+        wrap(data_model_class.new(login: 'result'))
       end
     end
 
-    expect(klass.build.foo_proxy).to eq('result')
+    expect(klass.build.login_proxy).to eq('result')
   end
 
   it 'should be able to run a model block for an AR::Base subclass' do
