@@ -18,10 +18,18 @@ module ProxyRecord
         end
       end
 
+      def instance_proxy_delegate(*m)
+        m.each do |method_name|
+          define_method(method_name) do |*args, &block|
+            ProxyRecord.wrap(data_model.public_send(method_name, *args, &block))
+          end
+        end
+      end
+
       def class_proxy_delegate(*m)
         m.each do |method_name|
-          define_singleton_method(method_name) do
-            wrap(data_model_class.public_send(method_name))
+          define_singleton_method(method_name) do |*args, &block|
+            wrap(data_model_class.public_send(method_name, *args, &block))
           end
         end
       end

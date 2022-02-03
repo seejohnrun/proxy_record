@@ -177,6 +177,18 @@ describe ProxyRecord do
     expect(klass.count).to eq(0)
   end
 
-  it 'should be able to set up wrap delegates at the instance level'
+  it 'should be able to set up wrap delegates at the instance level' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      class_proxy_delegate :create
+      instance_proxy_delegate :login
+    end
+
+    expect(klass.create(login: 'john').login).to eq('john')
+  end
+
   it 'should be able to set up wrap delegates for collection-returning instance methods'
 end
