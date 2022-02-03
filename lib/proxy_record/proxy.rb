@@ -1,4 +1,5 @@
 require 'active_support/core_ext/class'
+require_relative 'collection_proxy'
 
 module ProxyRecord
   class Proxy
@@ -10,7 +11,8 @@ module ProxyRecord
       def wrap(o)
         case o
         when data_model_class then new(o)
-        else raise 'Cannot wrap'
+        when ActiveRecord::Relation then CollectionProxy.new(o) { |e| wrap(e) }
+        else raise "Cannot wrap #{o}"
         end
       end
 

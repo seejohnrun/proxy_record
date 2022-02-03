@@ -106,7 +106,29 @@ describe ProxyRecord do
       end
     end
 
-    expect(klass.private_methods).to include(:wrap, :data_model_class)
+    expect(klass.private_methods).to include(:wrap, :data_model_class, :new)
     expect(klass.build.private_methods).to include(:data_model)
+  end
+
+  it 'should be able to wrap collections and call enumerable methods on them' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      def self.create
+        wrap(data_model_class.create)
+      end
+
+      def self.all
+        wrap(data_model_class.all)
+      end
+    end
+
+    klass.create
+
+    collection_proxy = klass.all
+    expect(collection_proxy.count).to eq(1)
+    expect(collection_proxy.first).to be_a(klass)
   end
 end
