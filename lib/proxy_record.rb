@@ -14,4 +14,12 @@ module ProxyRecord
     klass.send(:data_model_class=, data_model_class)
     klass
   end
+
+  def self.wrap(o)
+    case o
+    when ActiveRecord::Base then o.class.proxy_record_class.send(:new, o)
+    when ActiveRecord::Relation then CollectionProxy.new(o)
+    else o # non-AR types fall through
+    end
+  end
 end
