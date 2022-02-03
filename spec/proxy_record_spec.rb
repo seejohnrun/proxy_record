@@ -34,11 +34,13 @@ describe ProxyRecord do
       end
     end
 
-    klass = Class.new(ProxyRecord[model_parent_class])
+    klass = Class.new(ProxyRecord[model_parent_class]) do
+      def self.build
+        wrap(data_model_class.new)
+      end
+    end
 
-    instance = klass.wrap(klass.send(:data_model_class).new)
-
-    expect(instance).not_to respond_to(:foo)
+    expect(klass.build).not_to respond_to(:foo)
   end
 
   it 'should be able to call instance methods on the proxy class' do
@@ -52,11 +54,13 @@ describe ProxyRecord do
       def foo_proxy
         data_model.foo
       end
+
+      def self.build
+        wrap(data_model_class.new)
+      end
     end
 
-    instance = klass.wrap(klass.send(:data_model_class).new)
-
-    expect(instance.foo_proxy).to eq('result')
+    expect(klass.build.foo_proxy).to eq('result')
   end
 
   it 'should be able to run a model block for an AR::Base subclass' do
@@ -96,9 +100,13 @@ describe ProxyRecord do
       data_model_eval do
         self.table_name = 'users'
       end
+
+      def self.build
+        wrap(data_model_class.new)
+      end
     end
 
-    expect(klass).not_to respond_to(:data_model_class)
-    expect(klass.wrap(klass.send(:data_model_class).new).private_methods).to include(:data_model)
+    expect(klass.private_methods).to include(:wrap, :data_model_class)
+    expect(klass.build.private_methods).to include(:data_model)
   end
 end
