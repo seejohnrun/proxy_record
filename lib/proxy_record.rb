@@ -5,19 +5,41 @@ module ProxyRecord
     Object
   end
 
-  def self.[](underlying_class)
+  def self.[](model_class)
+    ar_model_class = Class.new(model_class)
+
     klass = Class.new(Proxy)
-    klass.underlying_class = underlying_class
+    klass.send(:model_class=, ar_model_class)
     klass
   end
 
   class Proxy
-    class_attribute :underlying_class, instance_predicate: false
+    class_attribute :model_class, instance_predicate: false
+    private_class_method :model_class, :model_class=
 
-    attr_reader :underlying_instance
+    def self.wrap(o)
+      case o
+      when model_class then new(o)
+      else raise 'Cannot wrap'
+      end
+    end
 
-    def initialize(underlying)
-      @underlying_instance = underlying
+    def self.model(&block)
+      model_class.class_eval(&block)
+    end
+
+    class << self
+      private :new
+    end
+
+    def initialize(data_model)
+      @data_model = data_model
+    end
+
+    private
+
+    def data_model
+      @data_model
     end
   end
 end
