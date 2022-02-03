@@ -131,4 +131,62 @@ describe ProxyRecord do
     expect(collection_proxy.count).to eq(1)
     expect(collection_proxy.first).to be_a(klass)
   end
+
+  it 'should be able to delegate method calls via a normal delegate call' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      delegate :login, to: :data_model
+
+      def self.build(login)
+        wrap(data_model_class.new(login: login))
+      end
+    end
+
+    random_login = SecureRandom.hex
+    expect(klass.build(random_login).login).to eq(random_login)
+  end
+
+  it 'should be able to set up wrap delegates at the class level' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      class_proxy_delegate :create
+    end
+
+    expect(klass.create).to be_a(klass)
+  end
+
+  it 'should be able to set up wrap delegates for collection-returning class methods' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      class_proxy_delegate :all, :create
+    end
+
+    created = klass.create
+    expect(klass.all.count).to eq(1)
+    expect(klass.all.first).to be_a(klass)
+  end
+
+  it 'should be able to use class_proxy_delegate for methods that return primitives' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+      end
+
+      class_proxy_delegate :count
+    end
+
+    expect(klass.count).to eq(0)
+  end
+
+  it 'should be able to set up wrap delegates at the instance level'
+  it 'should be able to set up wrap delegates for collection-returning instance methods'
 end

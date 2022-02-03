@@ -9,6 +9,6 @@ ActiveRecord::Base.connection.execute('create table users (login varchar(255))')
 
 RSpec.configure do |c|
   c.before :each do
-    ActiveRecord::Base.connection.execute('delete from users where 1=1')
+    ActiveRecord::Base.connection.execute('delete from users')
   end
 end
