@@ -90,4 +90,15 @@ describe ProxyRecord do
 
     expect(klass.create).to be_a(klass)
   end
+
+  it 'should not have public methods for accessing model_class or model' do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      model do
+        self.table_name = 'users'
+      end
+    end
+
+    expect(klass).not_to respond_to(:model_class)
+    expect(klass.wrap(klass.send(:model_class).new).private_methods).to include(:data_model)
+  end
 end
