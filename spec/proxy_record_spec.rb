@@ -211,7 +211,7 @@ describe ProxyRecord do
       instance_proxy_delegate :posts
 
       def create_post
-        Post.create(user: data_model)
+        ProxyRecord.wrap(data_model.posts.create)
       end
     end
     Object.const_set(:User, user_class)
