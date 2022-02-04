@@ -190,5 +190,40 @@ describe ProxyRecord do
     expect(klass.create(login: 'john').login).to eq('john')
   end
 
-  it 'should be able to set up wrap delegates for collection-returning instance methods'
+  it 'should be able to set up wrap delegates for collection-returning instance methods' do
+    post_class = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'posts'
+        belongs_to :user, class_name: 'User::DataModel'
+      end
+
+      class_proxy_delegate :create
+    end
+    Object.const_set(:Post, post_class)
+
+    user_class = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users'
+        has_many :posts, class_name: 'Post::DataModel', foreign_key: :user_id
+      end
+
+      class_proxy_delegate :create
+      instance_proxy_delegate :posts
+
+      def create_post
+        Post.create(user: data_model)
+      end
+    end
+    Object.const_set(:User, user_class)
+
+    user = user_class.create
+    post = user.create_post
+    expect(post).to be_a(post_class)
+
+    expect(user.posts.count).to eq(1)
+    expect(user.posts.first).to be_a(post_class)
+  ensure
+    Object.send(:remove_const, :Post) rescue nil
+    Object.send(:remove_const, :User) rescue nil
+  end
 end

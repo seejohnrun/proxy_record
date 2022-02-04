@@ -15,6 +15,7 @@ module ProxyRecord
       def inherited(model_class)
         if data_model_class
           data_model_class.proxy_record_class = model_class
+          model_class.const_set(:DataModel, data_model_class)
         end
       end
 
