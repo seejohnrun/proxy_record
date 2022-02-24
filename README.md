@@ -25,8 +25,8 @@ common cases:
     like `after_create` to do additional processing.
 
 The way that `ActiveRecord` works is pretty desirable for a smaller application,
-but as the project & teams grow, the more we fall into less desirable usage
-patterns that make things harder to maintain.
+but as the project & teams grow, the more we fall into usage patterns which can
+make things harder to maintain.
 
 This library is a proof-of-concept of what it might look like to introduce
 a layer in front of the data model, giving developers tighter control over
