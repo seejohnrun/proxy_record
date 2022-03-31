@@ -4,8 +4,9 @@ describe LiteRecord do
   let(:user_klass) do
     Class.new(ProxyRecord[ActiveRecord::Base]) do
       data_model_eval do
-        self.table_name = 'users'
+        self.table_name = 'users' # automatically populated in apps
       end
+
       include LiteRecord
     end
   end

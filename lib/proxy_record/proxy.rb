@@ -16,6 +16,10 @@ module ProxyRecord
         if data_model_class
           data_model_class.proxy_record_class = model_class
           model_class.const_set(:DataModel, data_model_class)
+
+          if model_class.name
+            data_model_class.table_name = model_class.name.pluralize.underscore
+          end
         end
       end
 
