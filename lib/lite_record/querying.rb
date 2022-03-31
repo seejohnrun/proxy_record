@@ -17,9 +17,9 @@ module LiteRecord
       ProxyRecord.wrap(data_model_class.last)
     end
 
-    def where(attributes)
+    def where(*where_attributes)
       scope = Scope.new(data_model_class.unscoped)
-      scope.where(attributes)
+      scope.where(*where_attributes)
       scope
     end
   end

@@ -11,8 +11,8 @@ module LiteRecord
       @scope = scope
     end
 
-    def where(attributes)
-      @scope = @scope.where(attributes)
+    def where(*where_attributes)
+      @scope = @scope.where(*where_attributes)
       self
     end
 

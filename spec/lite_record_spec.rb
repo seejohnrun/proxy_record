@@ -54,6 +54,19 @@ describe LiteRecord do
       expect(scope.to_a.count).to eq(1)
       expect(scope.to_a.first).to be_a(user_klass)
     end
+
+    it 'should be able to continue to refine a ProxyRecord::Scope' do
+      user_klass.send(:data_model_class).create!(login: 'foo')
+
+      expect(user_klass.send(:where, login: 'foo').to_a.count).to eq(1)
+      expect(user_klass.send(:where, login: 'foo').where(id: 100).to_a.count).to eq(0)
+    end
+
+    it 'should be able to use prepared statement wheres' do
+      user_klass.send(:data_model_class).create!(login: 'foo')
+
+      expect(user_klass.send(:where, 'login LIKE ?', 'fo%').to_a.count).to eq(1)
+    end
   end
 
   def assert_method_private(obj, method_name)
