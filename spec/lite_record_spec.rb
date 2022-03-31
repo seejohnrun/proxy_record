@@ -102,6 +102,17 @@ describe LiteRecord do
       instance = user_klass.send(:create!, login: 'foo')
       expect(instance.login).to eq('foo')
     end
+
+    it 'should be able to define public replacements and call super (methods defined in module)' do
+      user_klass.class_eval do
+        def login
+          "~~#{super}~~"
+        end
+      end
+
+      instance = user_klass.send(:create!, login: 'foo')
+      expect(instance.login).to eq('~~foo~~')
+    end
   end
 
   describe '#save!' do
