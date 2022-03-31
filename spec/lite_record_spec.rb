@@ -84,9 +84,14 @@ describe LiteRecord do
   end
 
   describe 'attribute methods' do
-    it 'should create private attribute methods' do
+    it 'should create private attribute getter methods' do
       instance = user_klass.send(:create!, login: 'foo')
       expect(call_private_method(instance, :login)).to eq('foo')
+    end
+
+    it 'should create private attribute setter methods' do
+      instance = user_klass.send(:create!, login: 'foo')
+      expect(call_private_method(instance, :login=, 'boo')).to eq('boo')
     end
 
     it 'should be able to make private methods public easily' do
@@ -96,6 +101,19 @@ describe LiteRecord do
 
       instance = user_klass.send(:create!, login: 'foo')
       expect(instance.login).to eq('foo')
+    end
+  end
+
+  describe '#save!' do
+    it 'should be able to call save! from within an instance' do
+      instance = user_klass.send(:create!, login: 'foo')
+
+      call_private_method(instance, :login=, 'boo')
+      return_value = call_private_method(instance, :save!)
+
+      expect(return_value).to eq(true)
+
+      expect(user_klass.send(:where, login: 'boo').count).to eq(1)
     end
   end
 
