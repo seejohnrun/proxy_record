@@ -55,7 +55,10 @@ describe LiteRecord do
       expect(scope.to_a.first).to be_a(user_klass)
     end
 
-    it 'should be able to continue to refine a ProxyRecord::Scope' do
+    # Skipped for now because it's actually fairly important that Scope _not_
+    # have `where` otherwise we're opening it up for refining outside of the
+    # class that created it.
+    it 'should be able to continue to refine a ProxyRecord::Scope', skip: true do
       user_klass.send(:data_model_class).create!(login: 'foo')
 
       expect(user_klass.send(:where, login: 'foo').to_a.count).to eq(1)
@@ -66,6 +69,14 @@ describe LiteRecord do
       user_klass.send(:data_model_class).create!(login: 'foo')
 
       expect(user_klass.send(:where, 'login LIKE ?', 'fo%').to_a.count).to eq(1)
+    end
+
+    it 'should be able to use basic enumerator methods on scopes' do
+      user_klass.send(:data_model_class).create!(login: 'foo')
+
+      scope = user_klass.send(:where, login: 'foo')
+      expect(scope.first).to be_a(user_klass)
+      expect(scope.last).to be_a(user_klass)
     end
   end
 

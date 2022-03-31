@@ -6,18 +6,24 @@ module LiteRecord
   #
   # * be private and thus not be callable from anywhere useful
   # * be public and defeat the purpose of this library
+  #
+  # We have to treat this class as if it could be exported to another place
+  # by return and be used (it likely will).
   class Scope
     def initialize(scope)
       @scope = scope
     end
 
-    def where(*where_attributes)
-      @scope = @scope.where(*where_attributes)
-      self
-    end
-
     def to_a
       @scope.map { |o| ProxyRecord.wrap(o) }
+    end
+
+    def first
+      ProxyRecord.wrap(@scope.first)
+    end
+
+    def last
+      ProxyRecord.wrap(@scope.last)
     end
   end
 end

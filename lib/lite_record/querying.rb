@@ -18,9 +18,8 @@ module LiteRecord
     end
 
     def where(*where_attributes)
-      scope = Scope.new(data_model_class.unscoped)
-      scope.where(*where_attributes)
-      scope
+      ar_scope = data_model_class.where(*where_attributes)
+      Scope.new(ar_scope)
     end
   end
 end
