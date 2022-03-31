@@ -1,4 +1,5 @@
 require_relative '../lib/proxy_record'
+require_relative '../lib/lite_record'
 require 'active_record'
 require 'securerandom'
 
