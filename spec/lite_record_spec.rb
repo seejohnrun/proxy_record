@@ -55,14 +55,16 @@ describe LiteRecord do
       expect(scope.to_a.first).to be_a(user_klass)
     end
 
-    # Skipped for now because it's actually fairly important that Scope _not_
-    # have `where` otherwise we're opening it up for refining outside of the
-    # class that created it.
-    it 'should be able to continue to refine a ProxyRecord::Scope', skip: true do
+    it 'should be able to continue to refine a ProxyRecord::Scope' do
+      assert_method_private(user_klass, :refine_scope)
+
       user_klass.send(:data_model_class).create!(login: 'foo')
 
-      expect(user_klass.send(:where, login: 'foo').to_a.count).to eq(1)
-      expect(user_klass.send(:where, login: 'foo').where(id: 100).to_a.count).to eq(0)
+      scope = user_klass.send(:where, login: 'foo')
+      expect(scope.count).to eq(1)
+
+      scope = user_klass.send(:refine_scope, scope, id: 100)
+      expect(scope.count).to eq(0)
     end
 
     it 'should be able to use prepared statement wheres' do
@@ -77,6 +79,7 @@ describe LiteRecord do
       scope = user_klass.send(:where, login: 'foo')
       expect(scope.first).to be_a(user_klass)
       expect(scope.last).to be_a(user_klass)
+      expect(scope.count).to be_a(Integer)
     end
   end
 

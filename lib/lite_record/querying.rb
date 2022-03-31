@@ -21,5 +21,10 @@ module LiteRecord
       ar_scope = data_model_class.where(*where_attributes)
       Scope.new(ar_scope)
     end
+
+    def refine_scope(scope, *where_attributes)
+      ar_scope = scope.instance_variable_get(:@scope).where(*where_attributes)
+      Scope.new(ar_scope)
+    end
   end
 end

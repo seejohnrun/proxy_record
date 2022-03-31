@@ -25,5 +25,9 @@ module LiteRecord
     def last
       ProxyRecord.wrap(@scope.last)
     end
+
+    def count
+      @scope.count
+    end
   end
 end
