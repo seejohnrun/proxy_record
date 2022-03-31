@@ -4,11 +4,6 @@ module LiteRecord
   module Querying
     private
 
-    def create!(*attributes)
-      created_record = data_model_class.create!(*attributes)
-      ProxyRecord.wrap(created_record)
-    end
-
     def first
       ProxyRecord.wrap(data_model_class.first)
     end
