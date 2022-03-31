@@ -1,2 +1,4 @@
 - less methods
 - scopes can't be chained
+- `validates` don't look at methods that are overriden
+- `validate` creates a new wrapper, losing any context inside ivars
