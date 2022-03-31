@@ -83,6 +83,22 @@ describe LiteRecord do
     end
   end
 
+  describe 'attribute methods' do
+    it 'should create private attribute methods' do
+      instance = user_klass.send(:create!, login: 'foo')
+      expect(call_private_method(instance, :login)).to eq('foo')
+    end
+
+    it 'should be able to make private methods public easily' do
+      user_klass.class_eval do
+        public :login
+      end
+
+      instance = user_klass.send(:create!, login: 'foo')
+      expect(instance.login).to eq('foo')
+    end
+  end
+
   def assert_method_private(obj, method_name)
     expect(obj).not_to respond_to(method_name)
     expect(obj.respond_to?(method_name, true)).to eq(true)
@@ -90,6 +106,7 @@ describe LiteRecord do
 
   # Ensure that the passed method is private, and call it
   def call_private_method(obj, method_name, *args)
+    assert_method_private(obj, method_name)
     obj.send(method_name, *args)
   end
 end
