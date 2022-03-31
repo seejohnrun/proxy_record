@@ -5,6 +5,9 @@ describe LiteRecord do
     Class.new(ProxyRecord[ActiveRecord::Base]) do
       data_model_eval do
         self.table_name = 'users' # automatically populated in apps
+        def self.name
+          'UserDataModel'
+        end
       end
 
       include LiteRecord
@@ -81,6 +84,43 @@ describe LiteRecord do
       expect(scope.first).to be_a(user_klass)
       expect(scope.last).to be_a(user_klass)
       expect(scope.count).to be_a(Integer)
+    end
+  end
+
+  describe '.validates' do
+    it 'should be able to transparently add rails validations' do
+      call_private_method(user_klass, :validates, :login, presence: true)
+    end
+
+    it 'should actually obey those validations on save!' do
+      call_private_method(user_klass, :validates, :login, presence: true)
+
+      instance = user_klass.send(:create!, login: 'foo')
+      instance.send(:login=, nil)
+
+      expect {
+        instance.send(:save!)
+      }.to raise_error(ActiveRecord::RecordInvalid)
+    end
+  end
+
+  describe '.validate' do
+    it 'should be able to validate with a method defined on the model class' do
+      user_klass.class_eval do
+        validate :validate_login_is_foo
+
+        private
+
+        def validate_login_is_foo
+          errors.add(:base, 'uhoh') unless login == 'foo'
+        end
+      end
+
+      user_klass.send(:create!, login: 'foo') # valid
+
+      expect {
+        user_klass.send(:create!, login: 'boo') # invalid
+      }.to raise_error(ActiveRecord::RecordInvalid)
     end
   end
 
