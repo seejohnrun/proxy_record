@@ -3,37 +3,26 @@ require 'spec_helper'
 describe LiteRecord do
   class Post < ProxyRecord[ActiveRecord::Base]
     include LiteRecord
-
-    data_model_eval do
-      def self.name
-        'Post'
-      end
-
-      def self.model_name
-        ActiveModel::Name.new(self, nil, 'Post')
-      end
-    end
   end
 
   after :all do
     Object.send(:remove_const, :Post)
   end
 
-  let(:user_klass) do
-    Class.new(ProxyRecord[ActiveRecord::Base]) do
-      data_model_eval do
-        self.table_name = 'users' # automatically populated in apps
-        def self.name
-          'User' # TODO figure this out, shouldn't be hard
-        end
+  after do
+    Object.send(:remove_const, :User) if defined?(User)
+  end
 
-        def self.model_name
-          ActiveModel::Name.new(self, nil, 'User')
-        end
+  let(:user_klass) do
+    klass = Class.new(ProxyRecord[ActiveRecord::Base]) do
+      data_model_eval do
+        self.table_name = 'users' # automatically populated in real apps
       end
 
       include LiteRecord
     end
+
+    Object.const_set(:User, klass)
   end
 
   describe '.create' do
@@ -207,12 +196,11 @@ describe LiteRecord do
       end
 
       instance = user_klass.send(:create!, login: 'foo')
-
       expect(call_private_method(instance, :posts).to_a).to eq([])
 
-      Post.send(:create!, user_id: instance.send(:data_model).id) # TODO next thing to handle
+      Post.send(:create!, user_id: instance.send(:data_model).id) # create a post for the user
 
-      instance.send(:data_model).send(:reload) # TODO not need this
+      instance.send(:data_model).send(:reload) # otherwise the collection above is memoized
       expect(call_private_method(instance, :posts).count).to eq(1)
       expect(call_private_method(instance, :posts).to_a.first).to be_a(Post)
     end

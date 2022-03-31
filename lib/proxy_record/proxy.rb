@@ -14,6 +14,7 @@ module ProxyRecord
 
       def inherited(model_class)
         if data_model_class
+          data_model_class.extend RewriteModelNames
           data_model_class.proxy_record_class = model_class
           model_class.const_set(:DataModel, data_model_class)
 
@@ -54,6 +55,17 @@ module ProxyRecord
 
     def data_model
       @data_model
+    end
+  end
+
+  # Extended into AR::Base subclasses to make them name like normal models
+  module RewriteModelNames
+    def model_name
+      ActiveModel::Name.new(self, nil, name)
+    end
+
+    def name
+      proxy_record_class.name
     end
   end
 end
