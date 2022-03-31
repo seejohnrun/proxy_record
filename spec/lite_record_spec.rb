@@ -1,12 +1,34 @@
 require 'spec_helper'
 
 describe LiteRecord do
+  class Post < ProxyRecord[ActiveRecord::Base]
+    include LiteRecord
+
+    data_model_eval do
+      def self.name
+        'Post'
+      end
+
+      def self.model_name
+        ActiveModel::Name.new(self, nil, 'Post')
+      end
+    end
+  end
+
+  after :all do
+    Object.send(:remove_const, :Post)
+  end
+
   let(:user_klass) do
     Class.new(ProxyRecord[ActiveRecord::Base]) do
       data_model_eval do
         self.table_name = 'users' # automatically populated in apps
         def self.name
-          'UserDataModel'
+          'User' # TODO figure this out, shouldn't be hard
+        end
+
+        def self.model_name
+          ActiveModel::Name.new(self, nil, 'User')
         end
       end
 
@@ -175,6 +197,24 @@ describe LiteRecord do
       call_private_method(instance, :destroy)
 
       expect(user_klass.send(:where, login: 'foo')).to be_empty
+    end
+  end
+
+  describe '#has_many' do
+    it 'should be able to define and use a has_many' do
+      user_klass.class_eval do
+        has_many :posts, dependent: :destroy
+      end
+
+      instance = user_klass.send(:create!, login: 'foo')
+
+      expect(call_private_method(instance, :posts).to_a).to eq([])
+
+      Post.send(:create!, user_id: instance.send(:data_model).id) # TODO next thing to handle
+
+      instance.send(:data_model).send(:reload) # TODO not need this
+      expect(call_private_method(instance, :posts).count).to eq(1)
+      expect(call_private_method(instance, :posts).to_a.first).to be_a(Post)
     end
   end
 
