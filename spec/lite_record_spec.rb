@@ -41,11 +41,11 @@ describe LiteRecord do
   end
 
   describe '.where' do
-    it 'should return a ProxyRecord::Scope of individual objects' do
+    it 'should return a ProxyRecord::CollectionProxy of individual objects' do
       assert_method_private(user_klass, :where)
 
       scope = user_klass.send(:where, login: 'foo')
-      expect(scope).to be_a(LiteRecord::Scope)
+      expect(scope).to be_a(ProxyRecord::CollectionProxy)
 
       expect(scope.to_a).to be_empty
 
@@ -55,7 +55,7 @@ describe LiteRecord do
       expect(scope.to_a.first).to be_a(user_klass)
     end
 
-    it 'should be able to continue to refine a ProxyRecord::Scope' do
+    it 'should be able to continue to refine a ProxyRecord::CollectionProxy' do
       assert_method_private(user_klass, :refine_scope)
 
       user_klass.send(:data_model_class).create!(login: 'foo')

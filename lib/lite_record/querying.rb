@@ -1,4 +1,4 @@
-require_relative './scope'
+require_relative '../proxy_record/collection_proxy'
 
 module LiteRecord
   module Querying
@@ -19,12 +19,12 @@ module LiteRecord
 
     def where(*where_attributes)
       ar_scope = data_model_class.where(*where_attributes)
-      Scope.new(ar_scope)
+      ProxyRecord::CollectionProxy.new(ar_scope)
     end
 
     def refine_scope(scope, *where_attributes)
-      ar_scope = scope.instance_variable_get(:@scope).where(*where_attributes)
-      Scope.new(ar_scope)
+      ar_scope = scope.instance_variable_get(:@collection).where(*where_attributes)
+      ProxyRecord::CollectionProxy.new(ar_scope)
     end
   end
 end
