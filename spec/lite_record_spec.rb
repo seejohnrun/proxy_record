@@ -129,6 +129,15 @@ describe LiteRecord do
     end
   end
 
+  describe '#destroy' do
+    it 'should be able to call destroy from within an instance' do
+      instance = user_klass.send(:create!, login: 'foo')
+      call_private_method(instance, :destroy)
+
+      expect(user_klass.send(:where, login: 'foo')).to be_empty
+    end
+  end
+
   def assert_method_private(obj, method_name)
     expect(obj).not_to respond_to(method_name)
     expect(obj.respond_to?(method_name, true)).to eq(true)

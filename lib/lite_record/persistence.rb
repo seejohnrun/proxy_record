@@ -11,6 +11,12 @@ module LiteRecord
       data_model.save!
     end
 
+    # Returns self
+    def destroy
+      data_model.destroy
+      self
+    end
+
     module ClassMethods
       private
 

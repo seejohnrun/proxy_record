@@ -18,6 +18,10 @@ module ProxyRecord
       @collection.count
     end
 
+    def empty?
+      @collection.empty?
+    end
+
     def each(&block)
       @collection.each do |record|
         yield ProxyRecord.wrap(record)
